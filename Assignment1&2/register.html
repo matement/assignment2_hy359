@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Εγγραφή</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Εγγραφή</h1>
+
+  <fieldset>
+    <legend>Εγγραφή ως</legend>
+    <label><input type="radio" name="accountType" value="user" checked> Χρήστης</label>
+    <label><input type="radio" name="accountType" value="hospital"> Νοσοκομείο</label>
+  </fieldset>
+
+  <form id="userForm">
+    <div class="row">
+      <label for="u-name">Ονοματεπώνυμο</label>
+      <input type="text" id="u-name" name="fullName" required>
+    </div>
+    <div class="row">
+      <label for="u-email">Email</label>
+      <input type="email" id="u-email" name="email" required>
+    </div>
+    <div class="row">
+      <label for="u-birth">Ημερομηνία γέννησης</label>
+      <input type="date" id="u-birth" name="birthDate" class="birth" required>
+      <span class="msg birth-msg"></span>
+    </div>
+    <div class="row">
+      <label for="u-country">Χώρα</label>
+      <input type="text" id="u-country" name="country" class="country" required>
+    </div>
+    <div class="row">
+      <label for="u-city">Πόλη</label>
+      <input type="text" id="u-city" name="city" class="city" required>
+    </div>
+    <div class="row">
+      <label for="u-address">Διεύθυνση</label>
+      <input type="text" id="u-address" name="address" class="street" required>
+    </div>
+    <div class="row">
+      <button type="button" class="verify-address">Επαλήθευση διεύθυνσης</button>
+      <button type="button" class="show-map" hidden>Εμφάνιση στο χάρτη</button>
+      <span class="msg address-msg"></span>
+    </div>
+    <div class="map-slot"></div>
+    <input type="hidden" name="lat" class="lat">
+    <input type="hidden" name="lon" class="lon">
+    <div class="row">
+      <label for="u-pw">Password</label>
+      <input type="password" id="u-pw" name="password" class="pw" required>
+      <button type="button" class="toggle-pw">Show password</button>
+      <button type="button" class="check-strength">See password strength</button>
+      <span class="msg strength-msg"></span>
+    </div>
+    <div class="row">
+      <label for="u-pw2">Επιβεβαίωση password</label>
+      <input type="password" id="u-pw2" name="confirmPassword" class="pw2" required>
+      <span class="msg match-msg"></span>
+    </div>
+    <button type="submit">Εγγραφή</button>
+  </form>
+
+  <form id="hospitalForm" hidden>
+    <div class="row">
+      <label for="h-name">Όνομα νοσοκομείου</label>
+      <input type="text" id="h-name" name="hospitalName" required>
+    </div>
+    <div class="row">
+      <label for="h-email">Email</label>
+      <input type="email" id="h-email" name="email" required>
+    </div>
+    <div class="row">
+      <label for="h-country">Χώρα</label>
+      <input type="text" id="h-country" name="country" class="country" required>
+    </div>
+    <div class="row">
+      <label for="h-city">Πόλη</label>
+      <input type="text" id="h-city" name="city" class="city" required>
+    </div>
+    <div class="row">
+      <label for="h-address">Διεύθυνση</label>
+      <input type="text" id="h-address" name="address" class="street" required>
+    </div>
+    <div class="row">
+      <button type="button" class="verify-address">Επαλήθευση διεύθυνσης</button>
+      <button type="button" class="show-map" hidden>Εμφάνιση στο χάρτη</button>
+      <span class="msg address-msg"></span>
+    </div>
+    <div class="map-slot"></div>
+    <input type="hidden" name="lat" class="lat">
+    <input type="hidden" name="lon" class="lon">
+    <div class="row">
+      <label for="h-pw">Password</label>
+      <input type="password" id="h-pw" name="password" class="pw" required>
+      <button type="button" class="toggle-pw">Show password</button>
+      <button type="button" class="check-strength">See password strength</button>
+      <span class="msg strength-msg"></span>
+    </div>
+    <div class="row">
+      <label for="h-pw2">Επιβεβαίωση password</label>
+      <input type="password" id="h-pw2" name="confirmPassword" class="pw2" required>
+      <span class="msg match-msg"></span>
+    </div>
+    <button type="submit">Εγγραφή</button>
+  </form>
+
+  <h2>Αποτέλεσμα (JSON)</h2>
+  <pre id="jsonOutput"></pre>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="geo.js"></script>
+  <script src="register.js"></script>
+</body>
+</html>
