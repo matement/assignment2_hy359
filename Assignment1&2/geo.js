@@ -1,16 +1,19 @@
 "use strict";
 
+// API and map settings
 const RAPIDAPI_KEY = "4fa60c4c20mshc21098ba020e6d2p1a5b1djsn2ce828bd99b9";
 const GEOCODE_HOST = "forward-reverse-geocoding.p.rapidapi.com";
 const GEOCODE_URL = "https://" + GEOCODE_HOST + "/v1/forward";
 const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
 
+// GET request that returns parsed JSON
 function requestJson(url, headers, onSuccess, onError) {
   const xhr = new XMLHttpRequest();
   xhr.open("GET", url, true);
   xhr.timeout = 10000;
   Object.keys(headers).forEach((name) => xhr.setRequestHeader(name, headers[name]));
 
+  // check status, then parse JSON
   xhr.onload = () => {
     if (xhr.status < 200 || xhr.status >= 300) {
       onError("HTTP " + xhr.status);
@@ -31,6 +34,7 @@ function requestJson(url, headers, onSuccess, onError) {
   xhr.send();
 }
 
+// check if a place is in Greece
 function isInGreece(place) {
   if (place.address && place.address.country_code) {
     return place.address.country_code.toLowerCase() === "gr";
@@ -38,6 +42,7 @@ function isInGreece(place) {
   return /greece|ελλάδα/i.test(place.display_name || "");
 }
 
+// turn API response into an array of places
 function toPlaceList(data) {
   if (Array.isArray(data)) return data;
   if (data && typeof data === "object") {
@@ -47,6 +52,7 @@ function toPlaceList(data) {
   return null;
 }
 
+// find address coordinates via geocoding API
 function findLocation(country, city, street, onResult, onError) {
   const params = new URLSearchParams({
     street: street.trim(),
@@ -61,6 +67,7 @@ function findLocation(country, city, street, onResult, onError) {
     "X-RapidAPI-Host": GEOCODE_HOST,
   };
 
+  // send request and check the result
   requestJson(GEOCODE_URL + "?" + params.toString(), headers, (data) => {
     const places = toPlaceList(data);
     if (places === null) {
@@ -86,6 +93,7 @@ function findLocation(country, city, street, onResult, onError) {
   }, onError);
 }
 
+// create Leaflet map
 function createMap(container, location, zoom) {
   const map = L.map(container).setView([location.lat, location.lon], zoom || 16);
   L.tileLayer(TILE_URL, {
@@ -95,12 +103,14 @@ function createMap(container, location, zoom) {
   return map;
 }
 
+// add marker with popup
 function addMarker(map, location, popupText) {
   const marker = L.marker([location.lat, location.lon]).addTo(map);
   if (popupText) marker.bindPopup(popupText);
   return marker;
 }
 
+// remove map and its container
 function destroyMap(map, container) {
   map.remove();
   container.remove();

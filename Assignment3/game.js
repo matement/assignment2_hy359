@@ -1,5 +1,6 @@
 "use strict";
 
+// build board cells (type and destination of each cell)
 function setPositions() {
 	var positions=[];
 	var snakePositions   =[13,38,46,73,81,87]
@@ -12,6 +13,7 @@ function setPositions() {
 	var snakes_or_ladders_NewPositions=["5 or 45","44 or 84","49 or 90"]
 
 
+	// set type for each cell 1-90
 	for (var i = 1; i <=90 ; i++) {
 	 positions[i]=new Object();
 	 positions[i].from=i;
@@ -46,8 +48,10 @@ function setPositions() {
 	 return positions;
 	}
 
+// board data
 var cells = setPositions();
 
+// sound files
 var SOUND_FILES = {
 	dice: "sounds/dice.mp3",
 	step: "sounds/move pawn.mp3",
@@ -55,13 +59,16 @@ var SOUND_FILES = {
 	win: "sounds/win sound.mp3"
 };
 
+// dice image names (index = number)
 var DICE_NAMES = ["", "one", "two", "three", "four", "five", "six"];
 
+// game settings
 var DICE_FOLDER = "ImagesDice";
 var STEP_DELAY = 350;
 var timeScale = 1;
 var END_CELL = 90;
 
+// game state
 var players = [];
 var currentPlayer = 0;
 var lastRoll = 0;
@@ -73,6 +80,7 @@ var winner = null;
 var messages = [];
 var session = 0;
 
+// play a sound (ignore autoplay errors)
 function playSound(name) {
 	var file = SOUND_FILES[name];
 	if (!file) {
@@ -85,16 +93,19 @@ function playSound(name) {
 	}
 }
 
+// delay for animations
 function wait(ms) {
 	return new Promise(function (resolve) {
 		setTimeout(resolve, ms * timeScale);
 	});
 }
 
+// random integer from min to max
 function randomInt(min, max) {
 	return min + Math.floor(Math.random() * (max - min + 1));
 }
 
+// add message to log (keep last 8)
 function addMessage(text) {
 	messages.unshift(text);
 	if (messages.length > 8) {
@@ -102,6 +113,7 @@ function addMessage(text) {
 	}
 }
 
+// reset everything and start new game
 function newGame() {
 	session++;
 	players = [
@@ -124,10 +136,12 @@ function newGame() {
 	updateGUI();
 }
 
+// current player
 function getPlayerTurn() {
 	return players[currentPlayer];
 }
 
+// switch player (rolling 6 = play again)
 function changePlayerTurn() {
 	if (lastRoll === 6) {
 		addMessage(getPlayerTurn().name + ": έφερε 6 και ξαναπαίζει!");
@@ -136,10 +150,12 @@ function changePlayerTurn() {
 	}
 }
 
+// win check
 function hasPlayerWon(player) {
 	return player.pos === END_CELL;
 }
 
+// cells to step through (bounce back after 90)
 function buildPath(from, roll, backward) {
 	var path = [];
 	var pos = from;
@@ -159,6 +175,7 @@ function buildPath(from, roll, backward) {
 	return path;
 }
 
+// show dice image
 function showDice(n) {
 	var diceImage = document.getElementById("diceImage");
 	diceImage.alt = "Ζάρι: " + n;
@@ -166,6 +183,7 @@ function showDice(n) {
 	diceImage.style.visibility = "visible";
 }
 
+// dice animation, then final roll
 function rollDice() {
 	return new Promise(function (resolve) {
 		playSound("dice");
@@ -184,6 +202,7 @@ function rollDice() {
 	});
 }
 
+// snake or ladder move
 async function slide(player, to, kind, sess) {
 	if (kind === "ladder") {
 		addMessage(player.name + ": πέρασε το μάθημα! Σκάλα από το " + player.pos + " στο " + to + ".");
@@ -202,6 +221,7 @@ async function slide(player, to, kind, sess) {
 	return sess === session;
 }
 
+// apply the effect of the landing cell
 async function resolveCell(player, sess) {
 	var cell = cells[player.pos];
 	if (cell.type === "Ladders") {
@@ -214,6 +234,7 @@ async function resolveCell(player, sess) {
 		var parts = cell.to.split(" or ");
 		var snakeTo = parseInt(parts[0], 10);
 		var ladderTo = parseInt(parts[1], 10);
+		// exam grade: <= 4 snake, >= 5 ladder
 		lastGrade = randomInt(0, 10);
 		addMessage(player.name + ": δίνει μάθημα και παίρνει βαθμό " + lastGrade + ".");
 		updateGUI();
@@ -241,6 +262,7 @@ async function resolveCell(player, sess) {
 	return "done";
 }
 
+// game over
 function endGame(player) {
 	gameOver = true;
 	busy = false;
@@ -253,6 +275,7 @@ function endGame(player) {
 	}, 100);
 }
 
+// end of turn: win check or next player
 function finishTurn(player) {
 	if (hasPlayerWon(player)) {
 		endGame(player);
@@ -263,6 +286,7 @@ function finishTurn(player) {
 	updateGUI();
 }
 
+// All In: pos% chance to go to 90, otherwise back to 1
 async function answerAllIn(accept) {
 	if (!pendingAllIn || gameOver) {
 		return;
@@ -298,6 +322,7 @@ async function answerAllIn(accept) {
 	finishTurn(player);
 }
 
+// one turn: roll, move, apply cell
 async function play() {
 	if (busy || gameOver || pendingAllIn) {
 		return;
@@ -311,6 +336,7 @@ async function play() {
 		return;
 	}
 	lastRoll = roll;
+	// party = move backward
 	var backward = player.partyRounds > 0;
 	if (backward) {
 		player.partyRounds--;
@@ -321,6 +347,7 @@ async function play() {
 		addMessage(player.name + ": έφερε " + roll + ".");
 	}
 	updateGUI();
+	// move step by step
 	var path = buildPath(player.pos, roll, backward);
 	for (var i = 0; i < path.length; i++) {
 		await wait(STEP_DELAY);
@@ -339,6 +366,7 @@ async function play() {
 	if (outcome === "aborted" || sess !== session) {
 		return;
 	}
+	// All In cell: wait for player's answer
 	if (outcome === "allin" && !hasPlayerWon(player)) {
 		pendingAllIn = true;
 		addMessage(player.name + ": κουτάκι All In! Θέλεις να ρισκάρεις;");
